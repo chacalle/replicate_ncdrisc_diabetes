@@ -850,10 +850,14 @@ V.acc              <- 0                                                         
 sigmas.acc         <- rep(0, ng)                                                 # Set the acceptance count for the variances of the spline coefficients to zero
 alpha.acc          <- rep(0, I)                                                  # Set the acceptance count for the variances of the modelled latent variable to zero
 
+for (i in 2:nLong) {
+    pct_complete <- round((i / nLong) * 100, 1)
+    # Print the number of iterations to screen (every 500 iterations)
+    print_every <- floor(nLong / 100)
+    if (i%%print_every == 0) message(paste0(i, " out of ", nLong, " iterations; ", pct_complete, "% complete"))
 
-for (i in 2:nLong) {                                                             # Loop from 2nd to the last MCMC iteration
-    if (i%%100 == 0) print(i)                                                    # Print the number of iterations to screen (every 100 iterations)
-    if (i%%2000 == 0) tracePlots()                                               # Save/update traceplots to PDF (every 2000 iterations)
+    save_every <- print_every * 4
+    if (i%%save_every == 0) tracePlots()                                         # Save/update traceplots to PDF (every 2000 iterations)
 
     # Tune the proposal variances every freq.val=200 iterations in the burn-in iterations (eg 5000 if nLong == 55000)
     if (i%%freq.val == 0 & i <= nLong - 50000) {
