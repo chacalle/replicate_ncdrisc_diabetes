@@ -82,6 +82,13 @@ sex.val             <- switch(sex, male = 1, female = 2)                        
 nIts                <- nLong/10                                                         # Number of MCMC iterations after thinning
 filename            <- paste0("Model",mod.no,"_",sex,"_",name_var,"_Seed_",seedVal)     # Sets a base filename used throughout the code
 
+sink_file_o <- paste0(outdirname, "/", filename, ".o.txt")
+sink_file_o <- file(sink_file_o, open = "wt")
+sink_file_m <- paste0(outdirname, "/", filename, ".m.txt")
+sink_file_m <- file(sink_file_m, open = "wt")
+sink(sink_file_o, type = "output")
+sink(sink_file_m, type = "message")
+
 ##### LIBRARIES AND FUNCTIONS ##################################################
 ##### Users should install these libraries before running this code            #
 ################################################################################
@@ -1333,3 +1340,6 @@ zeta        <- zeta[burnt,]                     # Save latent variable probit pr
 deviance    <- deviance[burnt]                  # Save deviance
 tracePlots()                                    # Output final traceplots
 save.image(paste0(outdirname, "/", filename, "Burnt.RData"))     # Save R workspace containing results
+
+sink(type = "output")
+sink(type = "message")
