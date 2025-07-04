@@ -44,15 +44,50 @@
 ##### Users should set appropriate values for the objects below                #
 ################################################################################
 
-seedVal             <- 1                                                        # Assign each chain a unique seed value
-sex                 <- "female"                                                 # Set sex: must be either "male" or "female"
-name_var            <- "diabetes_prevalence"                                    # Choose label for model results: "diabetes_prevalence" or "diabetes_treatment"
+library(argparse)
+parser <- argparse::ArgumentParser()
+parser$add_argument(
+  "--seedVal", type = "integer", required = !interactive(),
+  default = 1,
+  help = "Assign each chain a unique seed value"
+)
+parser$add_argument(
+  "--sex", type = "character", required = !interactive(),
+  default = "female",
+  help = "Set sex: must be either 'male' or 'female'"
+)
+parser$add_argument(
+  "--name_var", type = "character", required = !interactive(),
+  default = "diabetes_prevalence",
+  help = "Choose label for model results: 'diabetes_prevalence' or 'diabetes_treatment'"
+)
+parser$add_argument(
+  "--mod.no", type = "character", required = !interactive(),
+  default = "1",
+  help = "Set a unique model identifier: this can be any number or a character string"
+)
+parser$add_argument(
+  "--outdirname", type = "character", required = !interactive(),
+  default = "outputs/test/",
+  help = "Specify the directory to save results to"
+)
+parser$add_argument(
+  "--nLong", type = "integer", required = !interactive(),
+  default = 10000,
+  help = "Set number of iterations for MCMC loop"
+)
+args <- parser$parse_args()
+list2env(args, .GlobalEnv)
+
+if (!dir.exists(outdirname)) {
+  dir.create(outdirname, recursive = TRUE)
+}
+
 variable            <- "prev_diabetes"                                          # Set variable name for total diabetes prevalence when components are not available
 components          <- c("prev_treated_diabetes", "prev_diabetes_among_untreated")  # Set variable names for the components that make up total diabetes prevalence. 'components' = c(q,r) such that diabetes prevalence p = q + (1-q)*r
 n_variable          <- "n3"                                                     # Set variable name for sample size of diabetes when components are not available
 n_components        <- c("n1", "n2")                                            # Set variable names for sample sizes of treated and untreated diabetes when components are available
 cwvar_probit_var    <- paste0("add_var_", name_var)                             # Set additional variance variable (arising from uncertainty associated with using regression equations to estimate diabetes prevalence based on the primary definition of diabetes)
-mod.no              <- 1                                                        # Set a unique model identifier: this can be any number or a character string
 start.year          <- 1980                                                     # Set start year for analysis
 end.year            <- 2022                                                     # Set end year for analysis
 minimum.age         <- 18                                                       # Set minimum age of analysis (included)
@@ -61,7 +96,6 @@ knot1               <- 45                                                       
 middle.age          <- 55                                                       # Middle age in analysis
 knot2               <- 60                                                       # Position of second knot in cubic splines
 centring.year       <- 2001                                                     # Used to centre time
-nLong               <- 75000                                                    # Set number of iterations for MCMC loop
 epsilon             <- 0.001                                                    # Flat priors on the precision scale
 freq.val            <- 200                                                      # Number of iterations per tuning step in the burn-in iterations
 
@@ -102,8 +136,6 @@ library(zoo)                                                                    
 library(TTR)                                                                            # Used for the 'TenYearWeightedAvg' function
 if (initial.value.type == "provided"){ library("rockchalk") }                           # Used for the 'mvrnorm' function when sampling initial values for alpha and SSREs
 source("models/NCD_RisC_diabetes_functions.R")                                          # Loads functions
-
-outdirname <- "outputs/"
 
 ##### INDEXING INPUT ###########################################################
 ##### Indexing and covariate file must be a csv file with the following columns#
