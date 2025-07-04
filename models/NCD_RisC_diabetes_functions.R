@@ -230,7 +230,7 @@ update.theta <- function(SigmaInv.diag, VInv.diag, u, v, sv, w, a) {
 ##### without affecting the remainder of the code                              #
 ################################################################################
 tracePlots <- function() {
-    pdf(paste0(outdirname, filename, "_univariate_traceplots",".pdf"), width=10, height=7.5); par(mfrow=c(3,2), mar=c(0.5,4,0.5,0))  # Opens PDF document
+    pdf(paste0(outdirname, "/", filename, "_univariate_traceplots",".pdf"), width=10, height=7.5); par(mfrow=c(3,2), mar=c(0.5,4,0.5,0))  # Opens PDF document
         plot(phi_s,     type='l', xlab='', ylab='phi_s')    # Log variance for normal prior for superregion random intercepts      (log kappa_a^r)
         plot(phi_r,     type='l', xlab='', ylab='phi_r')    # Log variance for normal prior for region random intercepts           (log kappa_a^s)
         plot(phi_c,     type='l', xlab='', ylab='phi_c')    # Log variance for normal prior for country random intercepts          (log kappa_a^c)

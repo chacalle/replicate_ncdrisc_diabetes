@@ -65,9 +65,9 @@ nLong               <- 75000                                                    
 epsilon             <- 0.001                                                    # Flat priors on the precision scale
 freq.val            <- 200                                                      # Number of iterations per tuning step in the burn-in iterations
 
-covariate.file.name <- "covariates-urbanisation-2021.csv"                       # Set covariate filename; provided in utils folder
-country.file.name   <- "country-list-2023-new.csv"                              # Set country list filename; provided in utils folder
-data.file.name      <- "input.csv"                                              # Set data filename; provided inside NCD_RisC_Lancet_2024_input_data_diabetes.xlsx in the data folder
+covariate.file.name <- "utils/covariates-urbanisation-2021.csv"                 # Set covariate filename; provided in utils folder
+country.file.name   <- "utils/country-list-2023-new.csv"                        # Set country list filename; provided in utils folder
+data.file.name      <- "data/NCD_RisC_Lancet_2024_input_data_diabetes.xlsx"     # Set data filename; provided inside NCD_RisC_Lancet_2024_input_data_diabetes.xlsx in the data folder
 
 initial.value.type  <- "sampled in code"                                        # Set initial value type: takes "provided" or "sampled in code"
 if (initial.value.type == "provided") {
@@ -94,8 +94,9 @@ options(spam.cholsymmetrycheck=FALSE,spam.structurebased=FALSE)                 
 library(zoo)                                                                            # Used for the 'index' function
 library(TTR)                                                                            # Used for the 'TenYearWeightedAvg' function
 if (initial.value.type == "provided"){ library("rockchalk") }                           # Used for the 'mvrnorm' function when sampling initial values for alpha and SSREs
-source("NCD_RisC_diabetes_functions.R")                                                 # Loads functions
+source("models/NCD_RisC_diabetes_functions.R")                                          # Loads functions
 
+outdirname <- "outputs/"
 
 ##### INDEXING INPUT ###########################################################
 ##### Indexing and covariate file must be a csv file with the following columns#
@@ -125,11 +126,11 @@ covar                   <- subset(covar, data_year >= start.year & data_year <= 
 ##### model, please see supplementary document                                 #
 ##### 'NCD_RisC_Lancet_2024_input_data_DM.xlsx'.                               #
 ################################################################################
-data             <- read.csv(data.file.name, header = TRUE, stringsAsFactors = FALSE)                  # Load dataset
+data <- readxl::read_xlsx(data.file.name, sheet = "Survey data")                 # Load dataset
 
 # Generate indicator as to whether components of treated and untreated diabetes are available
 data$flag        <- NA
-data$flat[which(!is.na(data$prev_treated_diabetes) & !is.na(data$prev_diabetes_among_untreated))] <- 1 # When treated and untreated diabetes components are available
+data$flag[which(!is.na(data$prev_treated_diabetes) & !is.na(data$prev_diabetes_among_untreated))] <- 1 # When treated and untreated diabetes components are available
 data$flag[which((is.na(data$prev_treated_diabetes) | is.na(data$prev_diabetes_among_untreated)) & !is.na(data$prev_diabetes))] <- 0 # When components are unavailable
 data             <- data[which(data$flag %in% c(0,1)), ]                                               # Filter to just rows with available data that can be used in model
 
@@ -143,14 +144,14 @@ data$mid_year    <- ifelse(data$mid_year == end.year + 1 & data$survey_type == "
                            end.year, data$mid_year)
 
 # Get the sample size and prevalences for primary variable and the components
-data$number      <- round(data[,n_variable])
-data$prev        <- data[,variable]
-data$number_q    <- round(data[,n_components[1]])
-data$number_r    <- round(data[,n_components[2]])
-data$prev_q      <- data[,components[1]]
-data$prev_r      <- data[,components[2]]
+data$number      <- round(data[[n_variable]])
+data$prev        <- data[[variable]]
+data$number_q    <- round(data[[n_components[1]]])
+data$number_r    <- round(data[[n_components[2]]])
+data$prev_q      <- data[[components[1]]]
+data$prev_r      <- data[[components[2]]]
 
-data$cwvar_probit <- data[,cwvar_probit_var]
+data$cwvar_probit <- data[[cwvar_probit_var]]
 data$cwvar_probit[is.na(data$cwvar_probit)] <- 0                                                       # Set additional variance to 0 where diabetes prevalence is calculated directly from data without using regression equations
 
 if (!('iso' %in% names(data))){
@@ -1319,4 +1320,4 @@ alpha       <- alpha[burnt,]                    # Save modelled latent variable 
 zeta        <- zeta[burnt,]                     # Save latent variable probit proportion of diabetes that is treated
 deviance    <- deviance[burnt]                  # Save deviance
 tracePlots()                                    # Output final traceplots
-save.image(paste0(filename, "Burnt.RData"))     # Save R workspace containing results
+save.image(paste0(outdirname, "/", filename, "Burnt.RData"))     # Save R workspace containing results
