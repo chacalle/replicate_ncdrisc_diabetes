@@ -1289,7 +1289,15 @@ for (i in 2:nLong) {                                                            
 ##### Output results ###########################################################
 ##### Save the burnt-in, thinned chains                                        #
 ################################################################################
-burnt       <- (nIts-5000+1):nIts               # Discard the first (nIts-5000)/10 post-thinning iterations
+
+# Start with 75,000 iterations per chain
+# After thinning, saving 7,500 iterations per chain (1 / 10)
+# - found in code
+# After thinning and burn-in saving 5,000 iterations per chain (1/10 * 2/3)
+# - "We took 50,000 post-burn-in iterations from each of the eight target chains"... so discard first 25,000 iterations per chain as burn-in
+nBurn <- floor((1/3) * nIts)
+burnt <- (nBurn + 1):nIts                       # Keep the last 2/3 of the thinned iterations
+
 u           <- u[burnt,]                        # Save component of nonlinear trend at national level
 v           <- v[burnt,]                        # Save component of nonlinear trend at regional level
 sv          <- sv[burnt,]                       # Save component of nonlinear trend at superregional level
